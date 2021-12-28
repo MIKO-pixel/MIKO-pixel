@@ -1,0 +1,70 @@
+#Daten importieren, verstehen und dataframes aufbereiten
+
+Import csv as dataframe:
+$df = pd.read_csv('file.csv')
+
+allgemeine Info erhalten:
+$df.info()
+
+statistische Aussagen erhalten:
+$df.describe()
+
+Nur ausgewählte Spalten eines Dataframes in ein neues übernehmen:
+$df2 = df[["column_1", "column_2"]]
+
+Spalten entfernen:
+$df2 = df.drop(['column_5', 'column_6', 'column_7'], axis=1)
+
+Index neu setzen, zB. in einer weiteren Spalte mit aufsteigender RefNr.:
+$df3 = df2.reset_index(level=None, drop=False, inplace=False, col_level=0, col_fill='')
+
+Datentyp einer Spalte ändern auf Kategorie:
+$df[column_1] = df[column_1].astype('category')
+
+
+#Daten gruppieren und pivotieren
+
+Nach Spalte gruppieren und Summe bilden:
+$algo_cnt = df.groupby(['column_1']).count()
+
+Nach Spalte gruppieren und Mittelwert bilden:
+$algo_cnt = df.groupby('column_1').mean()
+
+Nach Spalte gruppieren, nach zweiter Spalte untergruppieren und von Untergruppe jeweils die Summe bilden:
+$df3 = df.groupby(['column_1', 'column_2'])["column_3"].apply(lambda x : x.astype(int).sum())
+
+What is unstack in Python? (entpivotieren)
+DataFrame - unstack() function
+Pivot a level of the (necessarily hierarchical) index labels, returning a DataFrame having a new level of column labels whose inner-most level consists of the pivoted index labels.
+$df4 = df3.unstack(level=- 1, fill_value='0')
+
+
+#Dataframes verbinden
+
+zwei Dataframes joinen (inner join):
+$joined_df2 = pd.merge(df2, df3, on='column_1', how='inner')
+
+
+#Explorative Datenanalyse
+
+Korrelationen zu Wert in column_1 darstellen:
+$corr = df2[['column_2', 'column_3', 'column_4']]
+$corr[corr.columns[:]].corr()['column_1'][:]
+
+Korrelations-Heatmap plotten (Seaborne):
+$import seaborn as sns
+$df_heatmap = df2.corr().round(2)
+$f, ax = plt.subplots(figsize=(18, 12))
+$sns.heatmap(df_heatmap, annot=True, annot_kws={'size': 10}, linewidths=.5)
+
+Scatterplot für zwei ausgewählte Parameter eines dataframes:
+$import matplotlib.pyplot as plt
+$import seaborn as sns
+$sns.set_theme(style="darkgrid")
+$sns.relplot(x="DE", y="bet", data=df);
+
+Save figure:
+$from pylab import savefig
+$figure = svm.get_figure()    
+$figure.savefig('svm_conf.png', dpi=400)
+
