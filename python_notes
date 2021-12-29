@@ -1,7 +1,21 @@
 #Daten importieren, verstehen und dataframes aufbereiten
 
+Verbindung zu sql-Datenbank herstellen:
+$server = 'sepcificname.database.windows.net' 
+$database = 'sepcificname' 
+$username = 'username' 
+$password = 'password'  
+$cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+$cursor = cnxn.cursor()
+
+Abfrage auf sql-Datenbank laufen lassen und Ergebnis als dataframe speichern:
+$query = "SELECT distinct column_1, count(column_2) as userid_count FROM [table] group by column_1;"
+$df = pd.read_sql(query, cnxn)
+
 Import csv as dataframe:
 $df = pd.read_csv('file.csv')
+weitere commands dazu:
+$delimiter=',', nrows=100000
 
 allgemeine Info erhalten:
 $df.info()
@@ -9,17 +23,53 @@ $df.info()
 statistische Aussagen erhalten:
 $df.describe()
 
+Anzahl Spalten und Zeilen anzeigen:
+$df.shape
+
+Nach Zeilen mit Wert 0 suchen:
+$df.isnull().sum()
+
+Nach leeren Zeilen suchen:
+$df.isna().sum()
+
 Nur ausgewählte Spalten eines Dataframes in ein neues übernehmen:
 $df2 = df[["column_1", "column_2"]]
 
 Spalten entfernen:
 $df2 = df.drop(['column_5', 'column_6', 'column_7'], axis=1)
 
+Leere Werte entfernen (notwendig für weitere Auswertungen bzw. joins):
+$df.dropna(axis='columns')
+
 Index neu setzen, zB. in einer weiteren Spalte mit aufsteigender RefNr.:
 $df3 = df2.reset_index(level=None, drop=False, inplace=False, col_level=0, col_fill='')
 
 Datentyp einer Spalte ändern auf Kategorie:
 $df[column_1] = df[column_1].astype('category')
+
+Datentyp einer Spalte ändern auf String (text):
+$df['column_1'] = oc_lastlogindate['column_1'].astype(str)
+
+Leerzeichen innerhalb der Zellen entfernen:
+$df.replace('', np.nan, inplace=True)
+
+String splitten nach Zeichen:
+$df.column_1.str.split(' ', expand=True)
+
+Spalten umbenennen:
+$df.rename(columns = {'column_1' : 'newnamedcolumn_1', 'column_2' : 'newnamedcolumn_2', 'column_3' : 'newnamedcolumn_3'}, inplace = True)
+
+Werte in Spalte sortieren:
+$df.sort_values(by=['column_1'], inplace=True)
+
+Grösste Werte einer Spalte anzeigen:
+$df.nlargest(20, 'column_1')
+
+
+#Daten exportieren
+
+Export zu csv:
+$df.to_csv('column_1.csv')
 
 
 #Daten gruppieren und pivotieren
@@ -29,6 +79,9 @@ $algo_cnt = df.groupby(['column_1']).count()
 
 Nach Spalte gruppieren und Mittelwert bilden:
 $algo_cnt = df.groupby('column_1').mean()
+
+Nach Spalte gruppieren und Werte zählen:
+$df.groupby('column_1')['column_2'].agg(['column_3'])
 
 Nach Spalte gruppieren, nach zweiter Spalte untergruppieren und von Untergruppe jeweils die Summe bilden:
 $df3 = df.groupby(['column_1', 'column_2'])["column_3"].apply(lambda x : x.astype(int).sum())
@@ -64,7 +117,32 @@ $sns.set_theme(style="darkgrid")
 $sns.relplot(x="DE", y="bet", data=df);
 
 Save figure:
+$from matplotlib import pyplot as plt
 $from pylab import savefig
 $figure = svm.get_figure()    
 $figure.savefig('svm_conf.png', dpi=400)
 
+Boxplot (böxli auf Linie):
+$from matplotlib import pyplot as plt
+$df.plot(kind="box", subplots=True, layout= (5,5), fontsize=12, figsize=(16,16))
+
+Distplot (Säulen und Trendlinie):
+$from matplotlib import pyplot as plt
+$sns.set(rc={'figure.figsize':(11.7,8.27)})
+$sns.distplot(df['column_1'], bins=30, kde=True)
+$plt.show()
+
+Pairplot (Säulen):
+$from matplotlib import pyplot as plt
+$feature_names = ['column_1']
+$sns.set(style='whitegrid',context='notebook')
+$cols=df[feature_names]
+$sns.pairplot(cols,height=6)
+$plt.show()
+
+Liniendiagramm:
+$from matplotlib import pyplot as plt
+df.head()
+plt.xlabel('column_1')
+plt.ylabel('column_2')
+plt.plot(oc_signupsperdatecount)
