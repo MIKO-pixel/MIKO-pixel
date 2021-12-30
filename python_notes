@@ -131,6 +131,20 @@ $import seaborn as sns
 $sns.set_theme(style="darkgrid")
 $sns.relplot(x="DE", y="bet", data=df);
 
+Kategorisierender Scatterplot:
+$sns.catplot(x="column_1", y="column_2", data=df)
+
+Kategorisierende Boxplots:
+$sns.catplot(x="column_1", y="column_2", hue="column_3", kind="box", data=df)
+
+Kategorisierender Violin-Plot:
+$sns.catplot(x="column_1", y="column_2", hue="column_3", kind="violin", data=df)
+
+Kategorisierende Bar-Plots:
+$sns.catplot(x="column_1", y="column_2", hue="column_3", kind="bar", data=df)
+
+Regressionsfunktion:
+$sns.regplot(x="column_1", y="column_2", data=df)
 
 Scatterplot-Matrix plotten:
 $from pandas.plotting import scatter_matrix
