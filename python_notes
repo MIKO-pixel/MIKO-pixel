@@ -44,14 +44,26 @@ $df.dropna(axis='columns')
 Index neu setzen, zB. in einer weiteren Spalte mit aufsteigender RefNr.:
 $df3 = df2.reset_index(level=None, drop=False, inplace=False, col_level=0, col_fill='')
 
+Indexspalte benennen:
+$df.index.name='index'
+
 Datentyp einer Spalte ändern auf Kategorie:
 $df[column_1] = df[column_1].astype('category')
 
 Datentyp einer Spalte ändern auf String (text):
 $df['column_1'] = oc_lastlogindate['column_1'].astype(str)
 
+Datentyp einer Spalte ändern auf float (Dezimalzahlen):
+$df["column_1"] = df["column_1"].astype(str).astype(float)
+
+Datentyp einer Spalte ändern auf Datum (Jahr-Monat-Tag):
+$ddf['date'] = pd.to_datetime(df.date , format = '%Y/%m/%d')
+
 Leerzeichen innerhalb der Zellen entfernen:
 $df.replace('', np.nan, inplace=True)
+
+Sonderzeichen aus string entfernen:
+$df.replace('’','', regex=True, inplace=True) 
 
 String splitten nach Zeichen:
 $df.column_1.str.split(' ', expand=True)
@@ -94,6 +106,9 @@ $df4 = df3.unstack(level=- 1, fill_value='0')
 
 #Dataframes verbinden
 
+mehrere Dataframes verketten:
+$df_new =  pd.concat([df1, df2, df3])
+
 zwei Dataframes joinen (inner join):
 $joined_df2 = pd.merge(df2, df3, on='column_1', how='inner')
 
@@ -116,6 +131,11 @@ $import seaborn as sns
 $sns.set_theme(style="darkgrid")
 $sns.relplot(x="DE", y="bet", data=df);
 
+
+Scatterplot-Matrix plotten:
+$from pandas.plotting import scatter_matrix
+$pd.plotting.scatter_matrix(df, alpha=0.5, figsize=(18,18), ax=None, grid=True, diagonal='hist', marker='.', density_kwds=None, hist_kwds=None, range_padding=0.05)
+
 Save figure:
 $from matplotlib import pyplot as plt
 $from pylab import savefig
@@ -125,6 +145,8 @@ $figure.savefig('svm_conf.png', dpi=400)
 Boxplot (böxli auf Linie):
 $from matplotlib import pyplot as plt
 $df.plot(kind="box", subplots=True, layout= (5,5), fontsize=12, figsize=(16,16))
+oder
+$boxplot = df.boxplot(column=['column_1', 'column_2', 'column_3'])
 
 Distplot (Säulen und Trendlinie):
 $from matplotlib import pyplot as plt
@@ -146,3 +168,71 @@ df.head()
 plt.xlabel('column_1')
 plt.ylabel('column_2')
 plt.plot(oc_signupsperdatecount)
+
+Umwandeln von Spalten in plot-bares Format:
+$df["column_1"] = df["column_1"].astype(str).astype(int)
+
+Zeitreihe mit mehereren Variablen (enthalten im dataframe, hier ist der Index "date"):
+$df.set_index('date').plot(rot=45)
+plt.xlabel("Bezeichnung1",size=14)
+plt.ylabel("Bezeichnung2",size=14)
+plt.title("Bezeichnung3", size=16)
+
+Zeitreihe einer spezifischen Spalte eines dataframes:
+$df.set_index('date')['column_1'].plot()
+plt.xlabel("Bezeichnung1",size=14)
+plt.ylabel("Bezeichnung2",size=14)
+plt.title("Bezeichnung3", size=16)
+
+Analyse von Ausreissern:
+# Funktion zur Berechnung der Whiskers:
+$def iqr_fences(column):
+    Q1 = column.quantile(0.25)
+    Q3 = column.quantile(0.75)
+    IQR = Q3 - Q1
+    lowerFence = Q1 - (1.1 * IQR)
+    upperFence = Q3 + (1.5 * IQR)
+    return lowerFence, upperFence
+
+$for label, content in df_transactionscorr.items():
+        Q1 = content.quantile(0.25)
+        Q3 = content.quantile(0.75)
+        IQR = Q3 - Q1
+        v_col = content[(content <= Q1 - 1.1 * IQR) | (content >= Q3 + 1.5 * IQR)]
+        perc = np.shape(v_col)[0] * 100.0 / np.shape(df_transactionscorr)[0]
+        print("Spalte {} Anteil an Outliers = {}%".format(label, round(perc, 2)))
+        
+$for i in df_transactionscorr.columns:
+    result = iqr_fences(df_transactionscorr[i])
+    lowerFence = result[0]
+    upperFence = result[1]
+    print("Lower Fence of {}: {}".format(i,lowerFence))
+    print("Upper Fence of {}: {}".format(i, upperFence))
+
+oder
+
+$Q1 = df['column_1'].quantile(0.25)
+Q3 = df['column_1'].quantile(0.75)
+IQR = Q3 - Q1
+MaxW = Q3 + 1.5*IQR
+MinW = Q1 - 1.1*IQR
+
+MAX_MV = df_transactionscorr[df_transactionscorr['bet']>MaxW]
+MAX_MV
+
+Schwarmdiagramm und Whisker:   
+$plt.figure(figsize=(7, 5))
+$ax = sns.boxplot(y="bet", data=df)
+$ax = sns.swarmplot(y="bet", data=df, color=".25")
+
+$lowerFence, upperFence = iqr_fences(df['column_1'])
+
+#Print-Statement für Whiskers
+$print("Min-Whisker: {} CHF".format((lowerFence*1).round(2)))
+$print("Max-Whisker: {} CHF".format((upperFence*1).round(2)))    
+
+# Print Anzahl der Datensätze, welche überhalb des Max-Whiskers liegen:
+$print(len(df[df['column_1'] > 5709381.5]))
+$print(len(df[df['column_1'] < -198130.7]))
+
+
